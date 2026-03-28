@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: real-estate-leads-pipeline
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://localhost:5432/realestate
+    user: realestate
+    password: realestate
+    locations: classpath:db/migration
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/realestate
+    username: realestate
+    password: realestate
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://issuer.example.local/real-estate
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,flyway
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+app:
+  security:
+    blocked-path-prefixes:
+      - /xmlrpc.php
+      - /wp-admin
+      - /wp-login.php
+      - /.env
+      - /boaform
+      - /.git
+    denylist-ttl: PT30M
+    block-threshold: 3
+  rate-limit:
+    replenish-per-minute: 60
+    burst-capacity: 120
+  portal:
+    allowed-origins:
+      - http://localhost:8080
+  topics:
+    lead-phase-changed: lead.phase.changed
+    security-threat-detected: security.threat.detected
+logging:
+  level:
+    org.springframework.security: INFO
+    com.github.dimitryivaniuta.gateway.realestate: INFO
